@@ -40,6 +40,7 @@ npm install --save leaflet-search
 | propertyName	  | 'title'	 | property in marker.options(or feature.properties for vector layer) trough filter elements in layer, |
 | formatData	  | null	 | callback for reformat all data from source to indexed data object |
 | filterData	  | null	 | callback for filtering data from text searched, params: textSearch, allRecords |
+| filtersearch	  | null	 | Optional comma-separated string to prepend to the search text |
 | moveToLocation  | null	 | callback run on location found, params: latlng, title, map |
 | buildTip		  | null	 | function to return row tip html node(or html string), receive text tooltip in first param |
 | container		  | ''	     | container id to insert Search Control		 |
