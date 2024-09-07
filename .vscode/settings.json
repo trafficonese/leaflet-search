@@ -1,8 +1,9 @@
 {
-  "eslint.enable": false,
+//   "eslint.enable": false,
 "editor.formatOnSave": false,
-"editor.autoIndent": "none",
+// "editor.autoIndent": "none",
 "editor.codeActionsOnSave": {
 
-}
+},
+"liveServer.settings.port": 5501
 }

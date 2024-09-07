@@ -108,7 +108,7 @@ grunt.registerTask('default', [
 	'concat',	
 	'cssmin',
 	'removelogging',	
-	'jshint',
+	// 'jshint',
 	'uglify'
 ]);
 

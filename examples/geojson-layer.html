@@ -48,8 +48,9 @@ Alabama, Arizona, Colorado, Maryland, Michigan, North Carolina, Pennsylvania, Wy
 		marker: false,
 		moveToLocation: function(latlng, title, map) {
 			//map.fitBounds( latlng.layer.getBounds() );
-			var zoom = map.getBoundsZoom(latlng.layer.getBounds());
-  			map.setView(latlng, zoom); // access the zoom
+			console.log("moveToLocation");console.log(latlng);
+			//var zoom = map.getBoundsZoom(latlng.layer.getBounds());
+  			//map.setView(latlng, zoom); // access the zoom
 		}
 	});
 
@@ -59,9 +60,22 @@ Alabama, Arizona, Colorado, Maryland, Michigan, North Carolina, Pennsylvania, Wy
 
 		//map.removeLayer(this._markerSearch)
 
+		console.log("search:locationfound")
+		console.log(e)
+
 		e.layer.setStyle({fillColor: '#3f0', color: '#0f0'});
-		if(e.layer._popup)
+		if (e.layer._layers) {
+			// Open popup for the first layer that has a popup
+			Object.values(e.layer._layers).some(layer => {
+				if (layer._popup) {
+					layer.openPopup();
+					return true; // Stop iteration after the first match
+				}
+				return false; // Continue iteration
+			});
+		} else if (e.layer._popup) {
 			e.layer.openPopup();
+		}
 
 	}).on('search:collapsed', function(e) {
 

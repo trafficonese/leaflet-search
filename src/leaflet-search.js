@@ -426,6 +426,8 @@
       this._countertips = 0
       this._tooltip.innerHTML = ''
       this._tooltip.currentSelection = -1 // inizialized for _handleArrowSelect()
+      console.log("showTooltip");
+      console.log(records);
 
       if (this.options.tooltipLimit) {
         for (const key in records) { // fill tooltip
@@ -538,44 +540,55 @@
     },
 
     _searchInLayer: function (layer, retRecords, propName, baseProp = 'options') {
-      const self = this; let loc
+      const self = this; 
+      let loc;
 
-      if (layer instanceof L.Control.Search.Marker) return
+      if (layer instanceof L.Control.Search.Marker) return;
 
       if (layer instanceof L.Marker || layer instanceof L.CircleMarker) {
-        if (self._getPath(layer.options, propName)) {
-          loc = layer.getLatLng()
-          loc.layer = layer
-          retRecords[self._getPath(layer.options, propName)] = loc
-        } else if (self._getPath(layer.feature.properties, propName)) {
-          loc = layer.getLatLng()
-          loc.layer = layer
-          retRecords[self._getPath(layer.feature.properties, propName)] = loc
+        // Handle markers
+        const key = self._getPath(layer.options, propName) || self._getPath(layer.feature.properties, propName);
+        if (key) {
+          loc = layer.getLatLng();
+          loc.layer = layer;
+          if (!retRecords[key]) {
+            retRecords[key] = [];
+          }
+          retRecords[key].push(loc);
         } else {
           console.warn(`propertyName '${propName}' not found in marker`);
         }
       } else if (layer instanceof L.Path || layer instanceof L.Polyline || layer instanceof L.Polygon) {
-        if (self._getPath(layer.options, propName)) {
-          loc = layer.getBounds().getCenter()
-          loc.layer = layer
-          retRecords[self._getPath(layer.options, propName)] = loc
-        } else if (self._getPath(layer.feature.properties, propName)) {
-          loc = layer.getBounds().getCenter()
-          loc.layer = layer
-          retRecords[self._getPath(layer.feature.properties, propName)] = loc
+        // Handle paths
+        const key = self._getPath(layer.options, propName) || self._getPath(layer.feature.properties, propName);
+        if (key) {
+          loc = layer.getBounds().getCenter();
+          loc.layer = layer;
+          if (!retRecords[key]) {
+            retRecords[key] = [];
+          }
+          retRecords[key].push(loc);
         } else {
           console.warn(`propertyName '${propName}' not found in shape`);
         }
       } else if (Object.prototype.hasOwnProperty.call(layer, 'feature')) { // GeoJSON
         if (Object.prototype.hasOwnProperty.call(layer.feature.properties, propName)) {
           if (layer.getLatLng && typeof layer.getLatLng === 'function') {
-            loc = layer.getLatLng()
-            loc.layer = layer
-            retRecords[layer.feature.properties[propName]] = loc
+            loc = layer.getLatLng();
+            loc.layer = layer;
+            const key = layer.feature.properties[propName];
+            if (!retRecords[key]) {
+              retRecords[key] = [];
+            }
+            retRecords[key].push(loc);
           } else if (layer.getBounds && typeof layer.getBounds === 'function') {
-            loc = layer.getBounds().getCenter()
-            loc.layer = layer
-            retRecords[layer.feature.properties[propName]] = loc
+            loc = layer.getBounds().getCenter();
+            loc.layer = layer;
+            const key = layer.feature.properties[propName];
+            if (!retRecords[key]) {
+              retRecords[key] = [];
+            }
+            retRecords[key].push(loc);
           } else {
             console.warn(`Unknown type of Layer`);
           }
@@ -583,9 +596,10 @@
           console.warn(`propertyName '${propName}' not found in feature`);
         }
       } else if (layer instanceof L.LayerGroup) {
+        // Recursively search in layer groups
         layer.eachLayer(function (layer) {
-          self._searchInLayer(layer, retRecords, propName)
-        })
+          self._searchInLayer(layer, retRecords, propName);
+        });
       }
     },
 
@@ -720,15 +734,18 @@
       L.DomUtil.addClass(this._container, 'search-load')
 
       if (this.options.layer) {
+        console.log("_fillRecordsCache for this.options.layer");
         // TODO _recordsFromLayer must return array of objects, formatted from _formatData
         this._recordsCache = this._recordsFromLayer()
 
         records = this._filterData(this._input.value, this._recordsCache)
+        console.log("records");console.log(records);
 
         this.showTooltip(records)
 
         L.DomUtil.removeClass(this._container, 'search-load')
       } else {
+        console.log("_fillRecordsCache for OSM");
         if (this.options.sourceData) { this._retrieveData = this.options.sourceData } else if (this.options.url) { // jsonp or ajax
           this._retrieveData = this.options.jsonpParam ? this._recordsFromJsonp : this._recordsFromAjax
         }
@@ -803,6 +820,7 @@
       this.hideAlert()
       this._hideTooltip()
 
+      console.log("_handleSubmit");
       if (this._input.style.display === 'none') { // on first click show _input only
         this.expand()
       } else {
@@ -810,17 +828,36 @@
           this.collapse()
         } else {
           const loc = this._getLocation(this._input.value)
-
+          console.log("_handleSubmit loc" + loc);
+          
           if (!loc) {
-            this.showAlert()
+            this.showAlert();
           } else {
-            this.showLocation(loc, this._input.value)
-            this.fire('search:locationfound', {
+            this.showLocation(loc, this._input.value);
+            console.log("_handleSubmit showLocation", this._input.value);
+
+            // Create a feature group to combine multiple layers
+            let combinedLayer = null;
+
+            if (Array.isArray(loc)) {
+              combinedLayer = L.featureGroup();
+              loc.forEach((location) => {
+                if (location.layer) {
+                  combinedLayer.addLayer(location.layer);
+                }
+              });
+            } else if (loc.layer) {
+              combinedLayer = loc.layer;
+            }
+
+            this.fire("search:locationfound", {
               latlng: loc,
               text: this._input.value,
-              layer: loc.layer ? loc.layer : null
-            })
+              layer: combinedLayer,
+            });
           }
+
+
         }
       }
     },
