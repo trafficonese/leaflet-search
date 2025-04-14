@@ -1,7 +1,7 @@
 /* 
- * Leaflet Control Search v4.0.0 - 2024-09-07 
+ * Leaflet Control Search v4.0.0 - 2025-04-14 
  * 
- * Copyright 2024 Stefano Cudini 
+ * Copyright 2025 Stefano Cudini 
  * stefano.cudini@gmail.com 
  * https://opengeo.tech/ 
  * 
