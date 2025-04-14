@@ -25,53 +25,88 @@ Darkgray, dodgerblue, gray, green, seashell
 
 	//sample data values for populate map
 	var data = [
-		{"loc":[41.319190,13.182145], "title":"Darkgray"},
-		{"loc":[41.129190,13.392145], "title":"Darkgray"},
+		{"loc":[41.319190,13.182145], "title":"Darkgray", "radius":12},
+		{"loc":[41.129190,13.392145], "title":"Darkgray", "radius":7},
 
-		{"loc":[41.369290,13.112545], "title":"dodgerblue"},
-		{"loc":[41.179290,13.322545], "title":"dodgerblue"},
-		
-		{"loc":[41.407190,13.342145], "title":"gray"},
-		{"loc":[41.408190,13.452145], "title":"gray"},
-		{"loc":[41.409190,13.562145], "title":"gray"},
+		{"loc":[41.369290,13.112545], "title":"dodgerblue", "radius":16},
+		{"loc":[41.179290,13.322545], "title":"dodgerblue", "radius":10},
 
-		{"loc":[41.594008,12.383884], "title":"green"},
-		{"loc":[41.694008,12.483884], "title":"green"},
-		{"loc":[41.794008,12.583884], "title":"green"},
+		{"loc":[41.407190,13.342145], "title":"gray", "radius":8},
+		{"loc":[41.408190,13.452145], "title":"gray", "radius":13},
+		{"loc":[41.409190,13.562145], "title":"gray", "radius":15},
 
-		{"loc":[41.436175,13.673590], "title":"seashell"},
-		{"loc":[41.326175,13.583590], "title":"seashell"},
-		{"loc":[41.216175,13.493590], "title":"seashell"}
+		{"loc":[41.594008,12.383884], "title":"green", "radius":6},
+		{"loc":[41.694008,12.483884], "title":"green", "radius":19},
+		{"loc":[41.794008,12.583884], "title":"green", "radius":9},
+
+		{"loc":[41.436175,13.673590], "title":"seashell", "radius":5},
+		{"loc":[41.326175,13.583590], "title":"seashell", "radius":11},
+		{"loc":[41.216175,13.493590], "title":"seashell", "radius":17}
 	];
 
-	var map = new L.Map('map', {zoom: 9 });	//set center from first location
-
-	map.addLayer(new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'));	//base layer
+	var map = new L.Map('map', {zoom: 9 })
+		.addLayer(new L.TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'));	//base layer
 
 	var markersLayer = new L.featureGroup();	//layer contain searched elements
+	for(i in data) {
+		var title = data[i].title,	//value searched
+			loc = data[i].loc,		//position found
+			marker = new L.circleMarker(new L.latLng(loc), {
+				color: title, 
+				radius: data[i].radius,
+				title: title
+		} );
+		marker.bindPopup(title);
+		markersLayer.addLayer(marker);
+	}
 	
 	map.addLayer(markersLayer);
+	map.fitBounds(markersLayer.getBounds());
 
 	var controlSearch = new L.Control.Search({
-		position:'topright',		
+		position:'topleft',		
 		layer: markersLayer,
-		initial: false,
+		initial: true,
 		zoom: 12,
-		marker: false
+		marker: false,
+		moveToLocation: function(latlng, title, map) {
+			console.log("moveToLocation");console.log(latlng); 
+			// Check if latlng is an array of coordinates (array of arrays)
+			if (Array.isArray(latlng)) {
+				map.fitBounds(L.latLngBounds(latlng));
+			} else {
+				var zoom = map.getBoundsZoom(latlng[0].layer.getBounds());
+				// Just a single coordinate pair
+				map.setView(latlng, zoom);
+			}
+		}
+	});
+
+	controlSearch.on('search:locationfound', function(e) {
+		console.log("search:locationfound"); console.log(e)
+		//e.layer.setStyle({fillColor: '#3f0', color: '#0f0'});
+		if (e.layer._layers) {
+			// Open popup for the first layer that has a popup
+			Object.values(e.layer._layers).some(layer => {
+				if (layer._popup) {
+					layer._popup.options.autoClose = false;
+					layer.openPopup();
+				}
+			});
+		} else if (e.layer._popup) {
+			e.layer.openPopup();
+		}
+	}).on('search:collapsed', function(e) {
+		//e.layer.setStyle({color: title, title: title});
+		markersLayer.eachLayer(function(layer) {	//restore feature color
+			//layer.setStyle({color: title, title: title});
+			//markersLayer.resetStyle(layer);
+		});	
 	});
 
 	map.addControl( controlSearch );
 
-	////////////populate map with markers from sample data
-	for(i in data) {
-		var title = data[i].title,	//value searched
-			loc = data[i].loc,		//position found
-			marker = new L.Marker(new L.latLng(loc), {title: title} );//se property searched
-		marker.bindPopup('title: '+ title );
-		markersLayer.addLayer(marker);
-	}
 
-	map.fitBounds(markersLayer.getBounds());
 
 </script>
 

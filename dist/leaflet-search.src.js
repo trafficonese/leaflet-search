@@ -943,8 +943,19 @@
     },
 
     setLatLng: function (latlng) {
-      L.Marker.prototype.setLatLng.call(this, latlng)
-      if (this._circleLoc) { this._circleLoc.setLatLng(latlng) }
+      if (Array.isArray(latlng)) {
+        latlng.forEach((point, i) => {
+          L.Marker.prototype.setLatLng.call(this, point);
+          if (this._circleLoc) {
+            this._circleLoc.setLatLng(point);
+          }
+        });
+      } else {
+        L.Marker.prototype.setLatLng.call(this, latlng);
+        if (this._circleLoc) {
+          this._circleLoc.setLatLng(latlng);
+        }
+      }
       return this
     },
 
@@ -960,6 +971,7 @@
       // TODO refact animate() more smooth! like this: http://goo.gl/DDlRs
       if (this._circleLoc) {
         const circle = this._circleLoc
+
         const tInt = 200 // time interval
         const ss = 5 // frames
         let mr = parseInt(circle._radius / ss)

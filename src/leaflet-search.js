@@ -927,8 +927,19 @@
     },
 
     setLatLng: function (latlng) {
-      L.Marker.prototype.setLatLng.call(this, latlng)
-      if (this._circleLoc) { this._circleLoc.setLatLng(latlng) }
+      if (Array.isArray(latlng)) {
+        latlng.forEach((point, i) => {
+          L.Marker.prototype.setLatLng.call(this, point);
+          if (this._circleLoc) {
+            this._circleLoc.setLatLng(point);
+          }
+        });
+      } else {
+        L.Marker.prototype.setLatLng.call(this, latlng);
+        if (this._circleLoc) {
+          this._circleLoc.setLatLng(latlng);
+        }
+      }
       return this
     },
 
