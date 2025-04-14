@@ -734,12 +734,10 @@
         }
 
         filterText =
-          (this.options.filtersearch
-            ? this.options.filtersearch.replace(/,+$/, "") + ","
-            : "") + inputText;
+          (this.options.filtersearch ? this.options.filtersearch.replace(/,+$/, "") + "," : "") + inputText;
 
         this._curReq = this._retrieveData.call(this, filterText, function (data) {
-          self._recordsCache = self._formatData(self, data)
+          self._recordsCache = self._formatData.call(self, data)
 
           // TODO refact!
           if (self.options.sourceData) { records = self._filterData(self._input.value, self._recordsCache) } else { records = self._recordsCache }
