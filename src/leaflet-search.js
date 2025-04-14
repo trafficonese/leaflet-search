@@ -426,8 +426,6 @@
       this._countertips = 0
       this._tooltip.innerHTML = ''
       this._tooltip.currentSelection = -1 // inizialized for _handleArrowSelect()
-      console.log("showTooltip");
-      console.log(records);
 
       if (this.options.tooltipLimit) {
         for (const key in records) { // fill tooltip
@@ -734,18 +732,15 @@
       L.DomUtil.addClass(this._container, 'search-load')
 
       if (this.options.layer) {
-        console.log("_fillRecordsCache for this.options.layer");
         // TODO _recordsFromLayer must return array of objects, formatted from _formatData
         this._recordsCache = this._recordsFromLayer()
 
         records = this._filterData(this._input.value, this._recordsCache)
-        console.log("records");console.log(records);
 
         this.showTooltip(records)
 
         L.DomUtil.removeClass(this._container, 'search-load')
       } else {
-        console.log("_fillRecordsCache for OSM");
         if (this.options.sourceData) { this._retrieveData = this.options.sourceData } else if (this.options.url) { // jsonp or ajax
           this._retrieveData = this.options.jsonpParam ? this._recordsFromJsonp : this._recordsFromAjax
         }
@@ -820,7 +815,6 @@
       this.hideAlert()
       this._hideTooltip()
 
-      console.log("_handleSubmit");
       if (this._input.style.display === 'none') { // on first click show _input only
         this.expand()
       } else {
@@ -828,13 +822,11 @@
           this.collapse()
         } else {
           const loc = this._getLocation(this._input.value)
-          console.log("_handleSubmit loc" + loc);
           
           if (!loc) {
             this.showAlert();
           } else {
             this.showLocation(loc, this._input.value);
-            console.log("_handleSubmit showLocation", this._input.value);
 
             // Create a feature group to combine multiple layers
             let combinedLayer = null;

@@ -442,8 +442,6 @@
       this._countertips = 0
       this._tooltip.innerHTML = ''
       this._tooltip.currentSelection = -1 // inizialized for _handleArrowSelect()
-      
-      
 
       if (this.options.tooltipLimit) {
         for (const key in records) { // fill tooltip
@@ -750,18 +748,15 @@
       L.DomUtil.addClass(this._container, 'search-load')
 
       if (this.options.layer) {
-        
         // TODO _recordsFromLayer must return array of objects, formatted from _formatData
         this._recordsCache = this._recordsFromLayer()
 
         records = this._filterData(this._input.value, this._recordsCache)
-        
 
         this.showTooltip(records)
 
         L.DomUtil.removeClass(this._container, 'search-load')
       } else {
-        
         if (this.options.sourceData) { this._retrieveData = this.options.sourceData } else if (this.options.url) { // jsonp or ajax
           this._retrieveData = this.options.jsonpParam ? this._recordsFromJsonp : this._recordsFromAjax
         }
@@ -836,7 +831,6 @@
       this.hideAlert()
       this._hideTooltip()
 
-      
       if (this._input.style.display === 'none') { // on first click show _input only
         this.expand()
       } else {
@@ -845,12 +839,10 @@
         } else {
           const loc = this._getLocation(this._input.value)
           
-          
           if (!loc) {
             this.showAlert();
           } else {
             this.showLocation(loc, this._input.value);
-            
 
             // Create a feature group to combine multiple layers
             let combinedLayer = null;
